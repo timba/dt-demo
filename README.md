@@ -18,7 +18,7 @@
 
 `dotnet run -p src/server/server.csproj`
 
-Open browser
+Open browser on URL https://localhost:5001/. Ignore SSL certificate error.
 
 ## Tests
 

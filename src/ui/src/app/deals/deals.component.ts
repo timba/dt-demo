@@ -35,6 +35,7 @@ export class DealsComponent implements OnInit {
       this.errorMessage = null;
       this.loading = false;
     }, error => {
+      this.dealsData = null;
       this.loading = false;
       if (error.status == 400 && error.error.message) {
         this.errorMessage = error.error.message;
