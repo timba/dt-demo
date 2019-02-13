@@ -1,6 +1,6 @@
 using System;
 
-namespace DTDemo.DealProcessing
+namespace DTDemo.DealProcessing.Csv
 {
     [Serializable]
     public class ParseException : ApplicationException

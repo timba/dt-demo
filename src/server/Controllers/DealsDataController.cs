@@ -36,11 +36,11 @@ namespace DTDemo.Server.Controllers
             {
                 deals = await this.dealRecordService.GetDeals(reader);
             }
-            catch (ParseException ex)
+            catch (InvalidDealRecordFileException ex)
             {
                 return BadRequest(new
                 {
-                    Message = $"CSV has error at line {ex.Line} position {ex.Column}: {ex.Message}"
+                    Message = ex.Message
                 });
             }
 

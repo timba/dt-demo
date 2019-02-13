@@ -17,18 +17,35 @@ namespace DTDemo.DealProcessing
 
         public async Task<DealRecord[]> GetDeals(TextReader reader)
         {
-            var records = await this.fileParser.Parse(reader);
-            return records.Select(it =>
-                new DealRecord
-                {
-                    Id = Int32.Parse(it[0]),
-                    CustomerName = it[1],
-                    DealershipName = it[2],
-                    Vehicle = it[3],
-                    Price = Single.Parse(it[4]),
-                    Date = DateTime.Parse(it[5])
-                }
-            ).ToArray();
+            string[][] records = null;
+            
+            try
+            {
+                records = await this.fileParser.Parse(reader);
+            }
+            catch (ParseException ex)
+            {
+                throw new InvalidDealRecordFileException($"CSV has error at line {ex.Line} position {ex.Column}: {ex.Message}");
+            }
+
+            try
+            {
+                return records.Select(it =>
+                    new DealRecord
+                    {
+                        Id = Int32.Parse(it[0]),
+                        CustomerName = it[1],
+                        DealershipName = it[2],
+                        Vehicle = it[3],
+                        Price = Single.Parse(it[4]),
+                        Date = DateTime.Parse(it[5])
+                    }
+                ).ToArray();
+            }
+            catch (Exception ex) when (ex is IndexOutOfRangeException || ex is FormatException)
+            {
+                throw new InvalidDealRecordFileException("The file is not valid Deals Records table or contains invalid data");
+            }
         }
     }
 }
