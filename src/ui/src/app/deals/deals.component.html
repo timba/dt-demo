@@ -1,0 +1,48 @@
+<h1>List of Deals</h1>
+
+<div>
+    <p><label for="file">Choose CSV File with Deals</label></p>
+    <input type="file"
+           id="file"
+           accept=".csv"
+           multiple="false"
+           (change)="fileSelected($event.target.files)">
+</div>
+
+<p *ngIf="loading"><em>Loading...</em></p>
+
+<table class='table table-striped' *ngIf="dealsData">
+  <thead>
+    <tr>
+      <th>Deal Number</th>
+      <th>Customer Name</th>
+      <th>Dealership Name</th>
+      <th>Vehicle</th>
+      <th>Price</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let deal of dealsData.deals">
+      <td>{{ deal.id }}</td>
+      <td>{{ deal.customerName }}</td>
+      <td>{{ deal.dealershipName }}</td>
+      <td>{{ deal.vehicle }}</td>
+      <td>{{ deal.price }}</td>
+      <td>{{ deal.date }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<p *ngIf="dealsData && dealsData.mostSoldVehicle">
+  Most popular vehicle: <strong>{{dealsData.mostSoldVehicle.name}}</strong>. 
+  It was sold times: <strong>{{dealsData.mostSoldVehicle.count}}</strong>
+</p>
+
+<p></p>
+
+<div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+    Error processing the file:
+    <p>{{errorMessage}}</p>
+</div>
+
