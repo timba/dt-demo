@@ -53,7 +53,7 @@ namespace DTDemo.DealProcessing.Csv
 
             if (parser.ParserType == ParserType.String)
             {
-                throw new ParseException($"Quoted record has not been closed but the record ended")
+                throw new ParseException($"Quoted record has not been closed but the file ended")
                 { Column = input.Length - 1 };
             }
 
