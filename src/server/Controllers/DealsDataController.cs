@@ -54,7 +54,7 @@ namespace DTDemo.Server.Controllers
                     DealershipName = it.DealershipName,
                     Vehicle = it.Vehicle,
                     Price = $"CAD${it.Price:#,#.00}",
-                    Date = it.Date.ToShortDateString()
+                    Date = it.Date
                 }).ToArray();
 
             return Ok(new DealRecordsSummaryView

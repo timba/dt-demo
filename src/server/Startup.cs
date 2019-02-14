@@ -33,6 +33,8 @@ namespace DTDemo.Server
 
             services.AddSingleton<IDealRecordService, DealRecordService>();
             services.AddSingleton<IDealStatService, DealStatService>();
+
+            // Codepage 28591 corresponds to 8-bit ASCII based character set ISO/IEC 8859-1 (Western European)
             services.AddSingleton<Encoding>(Encoding.GetEncoding(28591));
 
             services.AddSingleton<IRecordParser, RecordParser>();

@@ -9,6 +9,6 @@ namespace DTDemo.DealProcessing
         public string DealershipName { get; set; }
         public string Vehicle { get; set; }
         public float Price { get; set; }
-        public DateTime Date { get; set; }
+        public string Date { get; set; }
     }
 }
