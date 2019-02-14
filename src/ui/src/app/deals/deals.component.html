@@ -11,6 +11,15 @@
 
 <p *ngIf="loading"><em>Loading...</em></p>
 
+<p></p>
+
+<p *ngIf="dealsData && dealsData.mostSoldVehicle">
+  Most popular vehicle: <strong>{{dealsData.mostSoldVehicle.name}}</strong>. 
+  It was sold times: <strong>{{dealsData.mostSoldVehicle.count}}</strong>
+</p>
+
+<p></p>
+
 <table class='table table-striped' *ngIf="dealsData">
   <thead>
     <tr>
@@ -34,15 +43,7 @@
   </tbody>
 </table>
 
-<p *ngIf="dealsData && dealsData.mostSoldVehicle">
-  Most popular vehicle: <strong>{{dealsData.mostSoldVehicle.name}}</strong>. 
-  It was sold times: <strong>{{dealsData.mostSoldVehicle.count}}</strong>
-</p>
-
-<p></p>
-
 <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
     Error processing the file:
     <p>{{errorMessage}}</p>
 </div>
-
