@@ -50,7 +50,20 @@
       <DistFiles Include="$(SpaRoot)dist\**; $(SpaRoot)dist-server\**" />
       <DistFiles Include="$(SpaRoot)node_modules\**" Condition="'$(BuildServerSideRenderer)' == 'true'" />
       <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-        <RelativePath>%(DistFiles.Identity)</RelativePath>
+        <!-- 
+        UI folder is located outside from project's folder:
+          ..\ui\
+        That's why default Relative Path using %(DistFiles.Identity) 
+        metadata will produce us this path for UI files:
+          <publish_dir>\..\ui\
+        which will put UI files one level up from publish folder.
+        To eliminate this, we assuming that dist UI folder is flat
+        (no sub-folders) and taking each file's name and extension
+        and putting them into ui folder which will give us this perfect 
+        path:
+          <publish_dir>\ui\.....
+        -->
+        <RelativePath>ui\%(DistFiles.Filename)%(Extension)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
     </ItemGroup>
