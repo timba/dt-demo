@@ -34,19 +34,19 @@ Docker commands are run from solution root. If your Docker installation requires
 
 Image build takes some time and significant disk space (uo to 2 GB) for intermeiate SDK layers. To build the image locally, run this command:
 
-`docker build . -t timbabyuk/dt-demo`
+`docker build . -t timbabyuk/dt-demo:reactive`
 
 ### Pull image from Docker Hub
 
 Instead of building image locally, you canjust pull it from Docker Hub. Demo service image is stored in `timbabyuk/dt-demo` repository. To pull the image, execute:
 
-`docker pull timbabyuk/dt-demo`
+`docker pull timbabyuk/dt-demo:reactive`
 
 ### Run image
 
 Once image is built or pulled, execute this command to run container from the image:
 
-`docker run -p 8080:80 timbabyuk/dt-demo`
+`docker run -p 8080:80 timbabyuk/dt-demo:reactive`
 
 Now demo application is available on localhost, port 8080, URL http://localhost:8080
 
