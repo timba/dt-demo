@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr';
 
@@ -6,7 +6,7 @@ import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr';
   selector: 'app-deals',
   templateUrl: './deals.component.html'
 })
-export class DealsComponent implements OnInit {
+export class DealsComponent implements OnInit, OnDestroy {
 
   private hubConnection: HubConnection;
 
@@ -58,6 +58,10 @@ export class DealsComponent implements OnInit {
     });
 
     await this.hubConnection.start();
+  }
+
+  async ngOnDestroy() {
+    await this.hubConnection.stop();
   }
 
   fileSelected(files: FileList) {
