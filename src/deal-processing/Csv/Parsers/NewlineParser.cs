@@ -1,15 +1,15 @@
 namespace DTDemo.DealProcessing.Csv
 {
-    public class InitialParser : IParser
+    public class NewlineParser : IParser
     {
         private readonly char delimeter;
 
-        public InitialParser(char delimeter)
+        public NewlineParser(char delimeter)
         {
             this.delimeter = delimeter;
         }
 
-        public ParserType ParserType => ParserType.Initial;
+        public ParserType ParserType => ParserType.NewLine;
 
         public (char?, ParserType) Parse(char character)
         {

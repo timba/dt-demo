@@ -19,6 +19,8 @@ namespace DTDemo.DealProcessing.Csv
                     return (null, ParserType.Initial);
                 case Symbol.Quote:
                     throw new ParseException("Quote symbol not expected in unquoted field");
+                case Symbol.Newline:
+                    return (null, ParserType.NewLine);
                 default:
                     return (character, ParserType.Generic);
             }

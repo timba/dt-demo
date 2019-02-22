@@ -19,6 +19,8 @@ namespace DTDemo.DealProcessing.Csv
                     return (null, ParserType.Initial);
                 case Symbol.Quote:
                     return (Symbol.Quote, ParserType.String);
+                case Symbol.Newline:
+                    return (null, ParserType.NewLine);
                 default:
                     throw new ParseException(
                         $"After quote, expected another quote (\") or delimeter ({this.delimeter}), but '{character}' found");

@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 
 using DTDemo.DealProcessing.Csv;
@@ -9,54 +12,50 @@ namespace DTDemo.DealProcessing
 {
     public class DealRecordService : IDealRecordService
     {
-        private readonly IFileParser fileParser;
+        private readonly IRecordParser parser;
+        private readonly bool skipHeader;
 
-        public DealRecordService(IFileParser fileParser)
+        public DealRecordService(IRecordParser parser, bool skipHeader)
         {
-            this.fileParser = fileParser;
+            this.parser = parser;
+            this.skipHeader = skipHeader;
         }
 
-        public async Task<DealRecord[]> GetDeals(TextReader reader)
+        public IObservable<DealRecord> GetDeals(TextReader reader)
         {
-            string[][] records = null;
-
-            try
+            return this.parser.Parse(reader)
+            .Catch<(string[], int), ParseException>(ex =>
+                 Observable.Throw<(string[], int)>(new InvalidDealRecordFileException($"CSV has error at line {ex.Line} position {ex.Column}: {ex.Message}")))
+            .Skip(this.skipHeader ? 1 : 0)
+            .Where(record => 
+                record.Item1.Length > 1 || 
+                (record.Item1.Length == 1 && record.Item1[0].Length > 0))
+            .Select(record =>
             {
-                records = await this.fileParser.Parse(reader);
-            }
-            catch (ParseException ex)
-            {
-                throw new InvalidDealRecordFileException($"CSV has error at line {ex.Line} position {ex.Column}: {ex.Message}");
-            }
-
-            int brokenLine = 0;
-            try
-            {
-                return records.Select((it, line) =>
+                var (cols, line) = record;
+                try
                 {
-                    brokenLine = line;
                     return new DealRecord
                     {
-                        Id = Int32.Parse(it[0]),
-                        CustomerName = it[1],
-                        DealershipName = it[2],
-                        Vehicle = it[3],
-                        Price = Single.Parse(it[4]),
-                        Date = it[5]
+                        Id = Int32.Parse(cols[0]),
+                        CustomerName = cols[1],
+                        DealershipName = cols[2],
+                        Vehicle = cols[3],
+                        Price = Single.Parse(cols[4]),
+                        Date = cols[5]
                     };
                 }
-                ).ToArray();
-            }
-            catch (IndexOutOfRangeException)
-            {
-                throw new InvalidDealRecordFileException(
-                    $"The file is not valid Deals Records table. It contains invalid columns count at data record {brokenLine}.");
-            }
-            catch (FormatException ex)
-            {
-                throw new InvalidDealRecordFileException(
-                    $"The file is not valid Deals Records table. It contains invalid format value at data record {brokenLine}. Error: {ex.Message}");
-            }
+                catch (IndexOutOfRangeException)
+                {
+                    throw new InvalidDealRecordFileException(
+                        $"The file is not valid Deals Records table. It contains invalid columns count at data record {line}.");
+                }
+                catch (FormatException ex)
+                {
+                    throw new InvalidDealRecordFileException(
+                        $"The file is not valid Deals Records table. It contains invalid format value at data record {line}. Line: {string.Join(",", cols)}. Error: {ex.Message}");
+                }
+            });
         }
     }
 }

@@ -19,6 +19,8 @@ namespace DTDemo.DealProcessing.Csv
                     return (character, ParserType.String);
                 case Symbol.Quote:
                     return (null, ParserType.Quote);
+                case Symbol.Newline:
+                    throw new ParseException("String field not closed but new line found");
                 default:
                     return (character, ParserType.String);
             }

@@ -1,5 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr';
 
 @Component({
   selector: 'app-deals',
@@ -7,19 +8,59 @@ import { HttpClient } from '@angular/common/http';
 })
 export class DealsComponent implements OnInit {
 
+  private hubConnection: HubConnection;
+
+  private connextionId: string;
+
+  private dealRecords: DealRecord[];
+
   public dealsData: DealsData;
 
   public errorMessage: string;
 
   public loading: boolean;
 
-  constructor(readonly http: HttpClient, @Inject('BASE_URL') readonly baseUrl: string) { }
+  constructor(readonly http: HttpClient, @Inject('BASE_URL') readonly baseUrl: string) {
+  }
 
-  ngOnInit() {
+  async ngOnInit() {
+    this.hubConnection = new HubConnectionBuilder()
+      .withUrl(this.baseUrl + 'dealshub')
+      .build();
+
+    this.hubConnection.on("id", (connectionId: string) => {
+      this.connextionId = connectionId;
+    });
+
+    this.hubConnection.on("start", () => {
+      this.dealsData = null;
+      this.dealRecords = [];
+      this.errorMessage = null;
+      this.loading = true;
+    });
+
+    this.hubConnection.on("deal", (deal: DealRecord) => {
+      this.dealRecords.push(deal);
+    });
+
+    this.hubConnection.on("stat", (stat: MostSoldVehicle) => {
+      this.loading = false;
+      this.dealsData = {
+        deals: this.dealRecords.slice(0, 30),
+        mostSoldVehicle: stat
+      };
+    });
+
+    this.hubConnection.on("error", (error: string) => {
+      this.dealsData = null;
+      this.loading = false;
+      this.errorMessage = error;
+    });
+
+    await this.hubConnection.start();
   }
 
   fileSelected(files: FileList) {
-    console.log(files);
     if (files.length == 0) {
       return;
     }
@@ -27,25 +68,22 @@ export class DealsComponent implements OnInit {
     let file = files[0];
 
     let formData = new FormData();
+    formData.append('connectionId', this.connextionId);
     formData.append('file', file, file.name);
+
     this.loading = true;
+    this.errorMessage = null;
+    this.dealsData = null;
 
-    this.http.post<DealsData>(this.baseUrl + 'api/deals/upload', formData).subscribe(result => {
-      this.dealsData = result;
-      this.errorMessage = null;
-      this.loading = false;
-    }, error => {
-      this.dealsData = null;
-      this.loading = false;
-      if (error.status == 400 && error.error.message) {
-        this.errorMessage = error.error.message;
-      } else {
-        console.log(error);
-        this.errorMessage = "Unknown error occured when uploading your file: " + error.message;
-      }
-    });
+    this.http.post<DealsData>(this.baseUrl + 'api/deals/upload', formData).subscribe(
+      () => { },
+      error => {
+        this.dealsData = null;
+        this.loading = false;
+        console.error(error);
+        this.errorMessage = "Unknown error occured when uploading your file: " + JSON.stringify(error.error);
+      });
   }
-
 }
 
 interface MostSoldVehicle {

@@ -1,6 +1,5 @@
 using System.Text;
-using DTDemo.DealProcessing;
-using DTDemo.DealProcessing.Csv;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -8,6 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
+using DTDemo.DealProcessing;
+using DTDemo.DealProcessing.Csv;
+using DTDemo.Server.Hubs;
 
 namespace DTDemo.Server
 {
@@ -31,20 +34,24 @@ namespace DTDemo.Server
                 configuration.RootPath = "ui";
             });
 
-            services.AddSingleton<IDealRecordService, DealRecordService>();
-            services.AddSingleton<IDealStatService, DealStatService>();
+            services.AddSingleton<IDealRecordService>(cnt => 
+                new DealRecordService(cnt.GetService<IRecordParser>(), true));
+
+            services.AddTransient<IDealRecordStatAccumulator, DealRecordStatAccumulator>();
 
             // Codepage 28591 corresponds to 8-bit ASCII based character set ISO/IEC 8859-1 (Western European)
             services.AddSingleton<Encoding>(Encoding.GetEncoding(28591));
 
             services.AddSingleton<IRecordParser, RecordParser>();
-            services.AddSingleton<IFileParser>(container => new FileParser(container.GetService<IRecordParser>(), true));
             services.AddSingleton<IParser[]>(new IParser[] {
                 new InitialParser(','),
                 new GenericParser(','),
                 new StringParser(','),
-                new QuoteParser(',')
+                new QuoteParser(','),
+                new NewlineParser(',')
             });
+
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,6 +71,11 @@ namespace DTDemo.Server
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
+
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<DealsHub>("/dealshub");
+            });
 
             app.UseMvc(routes =>
             {

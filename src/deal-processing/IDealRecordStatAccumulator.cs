@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reactive.Subjects;
 using System.Threading.Tasks;
 
 namespace DTDemo.DealProcessing
 {
-    public interface IDealRecordService
+    public interface IDealRecordStatAccumulator
     {
-        IObservable<DealRecord> GetDeals(TextReader reader);
+        (string, int)? GetMostOftenSoldVehicle();
+
+        void Scan(DealRecord record);
     }
 }

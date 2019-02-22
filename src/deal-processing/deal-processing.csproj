@@ -5,4 +5,9 @@
     <RootNamespace>DTDemo.DealProcessing</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="signalr" Version="0.6.1" />
+    <PackageReference Include="System.Reactive" Version="4.1.3" />
+  </ItemGroup>
+
 </Project>
