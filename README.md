@@ -6,6 +6,10 @@
 - npm 6+
 - Chrome for tests
 
+## Note
+
+Current implementation slices first 30 records on UI for performance reasons when uploading large CSV files.
+
 ## Restore dependencies
 
 `dotnet restore`
