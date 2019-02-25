@@ -15,9 +15,10 @@ namespace DTDemo.DealProcessing.Csv
             this.parsers = parsers.ToDictionary(kv => kv.ParserType);
         }
 
-        public IObservable<(string[],int)> Parse(TextReader file)
+        public IObservable<(string[], int)> Parse(TextReader file)
         {
-            return Observable.Create<(string[],int)>(async observer => {
+            return Observable.Create<(string[], int)>(async observer =>
+            {
                 var buffer = new char[128];
                 var position = 0;
                 var read = 0;
@@ -28,7 +29,7 @@ namespace DTDemo.DealProcessing.Csv
 
                 int line = 0, col = 0;
 
-                while((read = await file.ReadBlockAsync(buffer, 0, buffer.Length)) > 0)
+                while ((read = await file.ReadBlockAsync(buffer, 0, buffer.Length)) > 0)
                 {
                     for (int i = 0; i < read; i++)
                     {
@@ -88,6 +89,6 @@ namespace DTDemo.DealProcessing.Csv
                 observer.OnCompleted();
 
             });
-       }
+        }
     }
 }

@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Net.Http.Headers;
 
 using DTDemo.DealProcessing;
 using DTDemo.Server.Hubs;
@@ -33,9 +35,22 @@ namespace DTDemo.Server.Controllers
         }
 
         [HttpPost("upload")]
-        public async Task<IActionResult> Upload(string connectionId, IFormFile file)
+        public async Task<IActionResult> Upload()
         {
-            using (var stream = file.OpenReadStream())
+            var contentType = this.Request.ContentType;
+            if (!contentType.StartsWith("multipart/form-data"))
+            {
+                BadRequest("Expected multipart form data");
+            }
+
+            var mediaType = MediaTypeHeaderValue.Parse(this.Request.ContentType);
+            var boundary = HeaderUtilities.RemoveQuotes(mediaType.Boundary);
+            var mpReader = new MultipartReader(boundary.Value, this.Request.Body);
+            var section = await mpReader.ReadNextSectionAsync();
+            var connectionId = await section.ReadAsStringAsync();
+            section = await mpReader.ReadNextSectionAsync();
+
+            using (var stream = section.Body)
             using (StreamReader reader = new StreamReader(stream, this.csvEncoding))
             {
                 Console.WriteLine($"Connection ID: '{connectionId}'");
