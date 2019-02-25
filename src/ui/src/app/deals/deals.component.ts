@@ -1,16 +1,19 @@
 import { Component, OnInit, OnDestroy, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr';
+import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@aspnet/signalr';
 
 @Component({
   selector: 'app-deals',
-  templateUrl: './deals.component.html'
+  templateUrl: './deals.component.html',
+  styleUrls: ['./deals.component.css']
 })
 export class DealsComponent implements OnInit, OnDestroy {
 
   private hubConnection: HubConnection;
 
-  private connextionId: string;
+  private resolveConnectionId: (connectionId: string) => void;
+
+  private connectionId: Promise<string>;
 
   private dealRecords: DealRecord[];
 
@@ -21,15 +24,33 @@ export class DealsComponent implements OnInit, OnDestroy {
   public loading: boolean;
 
   constructor(readonly http: HttpClient, @Inject('BASE_URL') readonly baseUrl: string) {
-  }
-
-  async ngOnInit() {
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(this.baseUrl + 'dealshub')
       .build();
+  }
 
+  private initializeConnectionIdPromise() {
+    this.connectionId = new Promise<string>((resolve, _reject) => {
+      this.resolveConnectionId = resolve;
+    });
+  }
+
+  private async ensureHubConnected() {
+    console.debug("Ensuring HUB connected:");
+    if (this.hubConnection.state != HubConnectionState.Connected) {
+      console.debug("=> HUB connecting...");
+      await this.hubConnection.start();
+      console.debug("=> HUB connected");
+    } else {
+      console.debug("=> HUB already connected");
+    };
+  }
+
+  async ngOnInit() {
     this.hubConnection.on("id", (connectionId: string) => {
-      this.connextionId = connectionId;
+      console.debug("Connection ID received");
+      this.resolveConnectionId(connectionId);
+      console.debug("Connection ID resolved");
     });
 
     this.hubConnection.on("start", () => {
@@ -57,22 +78,30 @@ export class DealsComponent implements OnInit, OnDestroy {
       this.errorMessage = error;
     });
 
-    await this.hubConnection.start();
+    this.hubConnection.onclose(_error => {
+      this.initializeConnectionIdPromise();
+    });
+
+    this.initializeConnectionIdPromise();
   }
 
   async ngOnDestroy() {
     await this.hubConnection.stop();
   }
 
-  fileSelected(files: FileList) {
+  async fileSelected(files: FileList) {
     if (files.length == 0) {
       return;
     }
 
+    await this.ensureHubConnected();
+
     let file = files[0];
 
     let formData = new FormData();
-    formData.append('connectionId', this.connextionId);
+    console.debug("Awaiting Connection ID...");
+    formData.append('connectionId', await this.connectionId);
+    console.debug("Connection ID awaited");
     formData.append('file', file, file.name);
 
     this.loading = true;
