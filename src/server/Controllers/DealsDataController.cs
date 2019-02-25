@@ -57,13 +57,13 @@ namespace DTDemo.Server.Controllers
                 var client = this.hubContext.Clients.Client(connectionId);
                 await client.start();
 
-                var evt = new SemaphoreSlim(0);
-
+                using (var evt = new SemaphoreSlim(0))
                 using (
                     this.dealRecordService
                         .GetDeals(reader)
                         .Do(this.dealRecordStatObserver.Scan)
                         .Subscribe(
+                            // New deals record parsed
                             async record =>
                             {
                                 await client.deal(new DealRecordView
@@ -76,12 +76,16 @@ namespace DTDemo.Server.Controllers
                                     Date = record.Date
                                 });
                             },
+
+                            // Error occurred
                             async error =>
                             {
                                 await client.error(error.Message);
                                 Console.WriteLine($"Error pushed: {error}");
                                 evt.Release();
                             },
+
+                            // Stream processing completed
                             async () =>
                             {
                                 var stat = this.dealRecordStatObserver.GetMostOftenSoldVehicle();
