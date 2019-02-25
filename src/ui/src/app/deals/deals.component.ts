@@ -23,6 +23,8 @@ export class DealsComponent implements OnInit, OnDestroy {
 
   public loading: boolean;
 
+  public count: number;
+
   constructor(readonly http: HttpClient, @Inject('BASE_URL') readonly baseUrl: string) {
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(this.baseUrl + 'dealshub')
@@ -62,6 +64,7 @@ export class DealsComponent implements OnInit, OnDestroy {
 
     this.hubConnection.on("deal", (deal: DealRecord) => {
       this.dealRecords.push(deal);
+      this.count = this.dealRecords.length;
     });
 
     this.hubConnection.on("stat", (stat: MostSoldVehicle) => {
@@ -104,6 +107,7 @@ export class DealsComponent implements OnInit, OnDestroy {
     console.debug("Connection ID awaited");
     formData.append('file', file, file.name);
 
+    this.count = 0;
     this.loading = true;
     this.errorMessage = null;
     this.dealsData = null;
