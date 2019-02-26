@@ -23,7 +23,7 @@ namespace DTDemo.Server.Hubs
 
         Task error(string message);
 
-        Task deal(Controllers.DealsDataController.DealRecordView deal);
+        Task d(Controllers.DealsDataController.DealRecordView deal);
 
     }
 

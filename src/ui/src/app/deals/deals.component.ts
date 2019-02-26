@@ -62,7 +62,7 @@ export class DealsComponent implements OnInit, OnDestroy {
       this.loading = true;
     });
 
-    this.hubConnection.on("deal", (deal: DealRecordCompressed) => {
+    this.hubConnection.on("d", (deal: DealRecordCompressed) => {
       this.dealRecords.push({
         id            : deal.i,
         customerName  : deal.n,

@@ -67,7 +67,7 @@ namespace DTDemo.Server.Controllers
                             // New deals record parsed
                             async record =>
                             {
-                                await client.deal(new DealRecordView
+                                await client.d(new DealRecordView
                                 {
                                     Id = record.Id,
                                     CustomerName = record.CustomerName,
