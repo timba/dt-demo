@@ -43,7 +43,7 @@ namespace DTDemo.Server
             services.AddSingleton<DealsDataControllerConfig>(new DealsDataControllerConfig(
                 // Codepage 28591 corresponds to 8-bit ASCII based character set ISO/IEC 8859-1 (Western European)
                 csvFileEncoding: Encoding.GetEncoding(28591), 
-                clientBufferSize: 500
+                clientBufferSize: 200
             ));
 
             services.AddSingleton<IRecordParser, RecordParser>();
