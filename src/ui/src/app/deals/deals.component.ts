@@ -62,15 +62,16 @@ export class DealsComponent implements OnInit, OnDestroy {
       this.loading = true;
     });
 
-    this.hubConnection.on("d", (deal: DealRecordCompressed) => {
-      this.dealRecords.push({
-        id            : deal.i,
-        customerName  : deal.n,
-        dealershipName: deal.d,
-        vehicle       : deal.v,
-        price         : deal.p,
-        date          : deal.t
-      });
+    this.hubConnection.on("deals", (deals: DealRecordCompressed[]) => {
+      deals.forEach(deal =>
+        this.dealRecords.push({
+          id            : deal.i,
+          customerName  : deal.n,
+          dealershipName: deal.d,
+          vehicle       : deal.v,
+          price         : deal.p,
+          date          : deal.t
+        }));
 
       this.count = this.dealRecords.length;
     });

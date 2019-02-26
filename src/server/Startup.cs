@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using DTDemo.DealProcessing;
 using DTDemo.DealProcessing.Csv;
+using DTDemo.Server.Controllers;
 using DTDemo.Server.Hubs;
 
 namespace DTDemo.Server
@@ -39,8 +40,11 @@ namespace DTDemo.Server
 
             services.AddTransient<IDealRecordStatAccumulator, DealRecordStatAccumulator>();
 
-            // Codepage 28591 corresponds to 8-bit ASCII based character set ISO/IEC 8859-1 (Western European)
-            services.AddSingleton<Encoding>(Encoding.GetEncoding(28591));
+            services.AddSingleton<DealsDataControllerConfig>(new DealsDataControllerConfig(
+                // Codepage 28591 corresponds to 8-bit ASCII based character set ISO/IEC 8859-1 (Western European)
+                csvFileEncoding: Encoding.GetEncoding(28591), 
+                clientBufferSize: 200
+            ));
 
             services.AddSingleton<IRecordParser, RecordParser>();
             services.AddSingleton<IParser[]>(new IParser[] {

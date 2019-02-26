@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
@@ -23,7 +24,7 @@ namespace DTDemo.Server.Hubs
 
         Task error(string message);
 
-        Task d(Controllers.DealsDataController.DealRecordView deal);
+        Task deals(IEnumerable<Controllers.DealsDataController.DealRecordView> deals);
 
     }
 

@@ -25,14 +25,20 @@ namespace DTDemo.Server.Controllers
         private readonly IDealRecordService dealRecordService;
         private readonly IDealRecordStatAccumulator dealRecordStatObserver;
         private readonly Encoding csvEncoding;
+        private readonly int clientBufferSize;
         private readonly IHubContext<DealsHub, IDealsHub> hubContext;
 
-        public DealsDataController(IDealRecordService dealRecordService, IDealRecordStatAccumulator dealRecordStatObserver, Encoding csvEncoding, IHubContext<DealsHub, IDealsHub> hubContext)
+        public DealsDataController(
+            IDealRecordService dealRecordService, 
+            IDealRecordStatAccumulator dealRecordStatObserver, 
+            IHubContext<DealsHub, IDealsHub> hubContext, 
+            DealsDataControllerConfig config)
         {
             this.dealRecordService = dealRecordService;
             this.dealRecordStatObserver = dealRecordStatObserver;
-            this.csvEncoding = csvEncoding;
             this.hubContext = hubContext;
+            this.csvEncoding = config.CsvFileEncoding;
+            this.clientBufferSize = config.ClientBufferSize;
         }
 
         [HttpPost("upload")]
@@ -52,7 +58,7 @@ namespace DTDemo.Server.Controllers
             section = await mpReader.ReadNextSectionAsync();
 
             using (var stream = section.Body)
-            using (StreamReader reader = new StreamReader(stream, this.csvEncoding))
+            using (var reader = new StreamReader(stream, this.csvEncoding))
             {
                 Console.WriteLine($"Connection ID: '{connectionId}'");
                 var client = this.hubContext.Clients.Client(connectionId);
@@ -63,19 +69,20 @@ namespace DTDemo.Server.Controllers
                     this.dealRecordService
                         .GetDeals(reader)
                         .Do(this.dealRecordStatObserver.Scan)
+                        .Buffer(this.clientBufferSize)
                         .Subscribe(
                             // New deals record parsed
-                            async record =>
+                            async deals =>
                             {
-                                await client.d(new DealRecordView
+                                await client.deals(deals.Select(deal => new DealRecordView
                                 {
-                                    Id = record.Id,
-                                    CustomerName = record.CustomerName,
-                                    DealershipName = record.DealershipName,
-                                    Vehicle = record.Vehicle,
-                                    Price = $"CAD${record.Price:#,#.00}",
-                                    Date = record.Date
-                                });
+                                    Id = deal.Id,
+                                    CustomerName = deal.CustomerName,
+                                    DealershipName = deal.DealershipName,
+                                    Vehicle = deal.Vehicle,
+                                    Price = $"CAD${deal.Price:#,#.00}",
+                                    Date = deal.Date
+                                }));
                             },
 
                             // Error occurred
