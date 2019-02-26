@@ -62,8 +62,16 @@ export class DealsComponent implements OnInit, OnDestroy {
       this.loading = true;
     });
 
-    this.hubConnection.on("deal", (deal: DealRecord) => {
-      this.dealRecords.push(deal);
+    this.hubConnection.on("deal", (deal: DealRecordCompressed) => {
+      this.dealRecords.push({
+        id            : deal.i,
+        customerName  : deal.n,
+        dealershipName: deal.d,
+        vehicle       : deal.v,
+        price         : deal.p,
+        date          : deal.t
+      });
+
       this.count = this.dealRecords.length;
     });
 
@@ -128,13 +136,22 @@ interface MostSoldVehicle {
   count: number;
 }
 
+interface DealRecordCompressed {
+  i: number; // id
+  n: string; // customerName
+  d: string; // dealershipName
+  v: string; // vehicle
+  p: string; // price
+  t: string; // date
+}
+
 interface DealRecord {
-  id: number;
-  customerName: string;
+  id            : number;
+  customerName  : string;
   dealershipName: string;
-  vehicle: string;
-  price: string;
-  date: string;
+  vehicle       : string;
+  price         : string;
+  date          : string;
 }
 
 interface DealsData {

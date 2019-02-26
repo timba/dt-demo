@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
 
 using DTDemo.DealProcessing;
 using DTDemo.Server.Hubs;
@@ -128,11 +129,22 @@ namespace DTDemo.Server.Controllers
 
         public class DealRecordView
         {
+            [JsonProperty("i")]
             public int Id { get; set; }
+
+            [JsonProperty("n")]
             public string CustomerName { get; set; }
+
+            [JsonProperty("d")]
             public string DealershipName { get; set; }
+
+            [JsonProperty("v")]
             public string Vehicle { get; set; }
+
+            [JsonProperty("p")]
             public string Price { get; set; }
+
+            [JsonProperty("t")]
             public string Date { get; set; }
         }
     }
